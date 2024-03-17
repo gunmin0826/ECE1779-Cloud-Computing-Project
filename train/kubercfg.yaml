@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yolo-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: yolo
+  template:
+    metadata:
+      labels:
+        app: yolo
+    spec:
+      containers:
+      - name: yolov8-container
+        image: <your-image-name>
+        ports:
+        - containerPort: 80
