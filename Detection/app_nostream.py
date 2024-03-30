@@ -20,6 +20,7 @@ while cap.isOpened():
     success, frame = cap.read()
     if success:
         # Perform detection
+        print(frame)
         results_gen = model(frame, stream=True)
         try:
             results=next(results_gen)
