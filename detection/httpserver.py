@@ -14,19 +14,17 @@ host = ('localhost', 8888)
 class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self):
         self.yoloModel = yoloProcess()
+        self.pFrame = False
         
     def do_GET(self):
         #print("111111:",self.address_string, self.client_address,self.request,"\n\n\n:",self.path)
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
+        self.send_header('Content-type', 'image/jpeg')
         self.end_headers()
-        filename = "."+self.path
-        #with open(filename, 'r') as f:
-        with open(filename, 'rb') as f:
-            rdata = f.read()
-            #response = json.dumps(rdata.hex())
-            #self.wfile.write(response.encode())
-            self.wfile.write(rdata)
+        if self.pFrame:
+            self.wfile.write(self.pFrame)
+        else:
+            self.wfile.write(b"No image has been processed yet.")
 
 
     def do_POST(self):
@@ -51,6 +49,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(processedFrame)
+                    self.pFrame = processedFrame
                 else:
                     self.send_response(400)
                     self.end_headers()
@@ -67,6 +66,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             self.wfile.write(processedFrame)
+            self.pFrame = processedFrame
 
         else:
             self.send_response(400)
