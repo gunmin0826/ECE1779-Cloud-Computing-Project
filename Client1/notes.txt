@@ -1,0 +1,16 @@
+### Download Below modules used by Client1 ###
+1. expo-status-bar:
+    npx expo install expo-status-bar
+
+2. expo-device:
+    npx expo install expo-device
+
+3. expo-camera:
+    npx expo install expo-camera
+
+4. axios:
+    npm install axios
+
+5. 'react-navigation' related modules:
+    npx expo install react-native-screens react-native-safe-area-context
+    npm install @react-navigation/native-stack
