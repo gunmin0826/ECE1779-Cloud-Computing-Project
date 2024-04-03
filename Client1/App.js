@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 // import pages to be used in the Navigation stacks
 import Network_page from './screen_pages/Network_page.js';
 import Camera_page from './screen_pages/Camera_page.js';
+import Display_page from './screen_pages/Display_page/js';
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +52,14 @@ const Homescreen = ({navigation, route}) => {
             navigation.navigate("Access Camera", params=(route.params)? route.params : base_params )
           }
         />
+        <Text></Text>
+        <Text>Press this button to display result</Text>
+        <Button
+          title="Display Image"
+          onPress={() =>
+            navigation.navigate("Display Image", params=(route.params)? route.params : base_params )
+          }
+        />
         <StatusBar style="auto"/>
       </View>
   );
@@ -66,6 +75,7 @@ export default function App() {
         <Stack.Screen name="Home" component={Homescreen}/>
         <Stack.Screen name="Establish Network" component={Network_page}/>
         <Stack.Screen name="Access Camera" component={Camera_page}/>
+        <Stack.Screen name="Display Image" component={Display_page}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
