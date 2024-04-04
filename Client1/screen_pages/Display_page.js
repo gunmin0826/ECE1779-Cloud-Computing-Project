@@ -22,11 +22,12 @@ const Display_page = ({navigation, route}) => {
     // console.log("url: " + url)
     axios({
       method: 'get',
-      url: url,//check URL with Lily or have another way to input URL in the UI
+      url: url + '/view_app',//check URL with Lily or have another way to input URL in the UI
       timeout: 5000,
     })
       .then((response) => {
         if(response === 200){//successfully sent image back
+          console.log(response.data);
           updateImage(response.data)
           updateImageBool(true)
         } else if (response === 400){

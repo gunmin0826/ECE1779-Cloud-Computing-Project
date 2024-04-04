@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 // import pages to be used in the Navigation stacks
 import Network_page from './screen_pages/Network_page.js';
 import Camera_page from './screen_pages/Camera_page.js';
-import Display_page from './screen_pages/Display_page/js';
+import Display_page from './screen_pages/Display_page.js';
 
 const Stack = createNativeStackNavigator();
 
