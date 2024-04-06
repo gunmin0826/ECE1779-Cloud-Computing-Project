@@ -10,6 +10,7 @@ class yoloProcess():
 
     def processFrame(self,frame):
         results_gen = self.model(frame, stream=True)
+        results=next(results_gen)
         annotated_frame = results.plot()
         return annotated_frame
         
