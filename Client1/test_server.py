@@ -11,11 +11,15 @@ import numpy as np
 
 
 app = Flask(__name__)
+default_img = cv.imread('greeting_img.png')
+global send_default 
+send_default = True
 
 global img
-global base64_string
+
 @app.route('/stream', methods=['GET','POST'])
 def receive_photo():
+    global send_default
     if request.method == 'POST':
         request_data = request.get_json()
         # Fname = request_data['Fname']
@@ -23,6 +27,7 @@ def receive_photo():
         print(request_data['width'])
         print(request_data['height'])
         
+        global base64_string
         base64_string = request_data['base64']
 
         nparr = np.fromstring(base64.b64decode(base64_string), np.uint8)
@@ -31,6 +36,8 @@ def receive_photo():
         # print('img.dtype:', img.dtype)
         # print()
         cv.imwrite('img.jpg', img)
+        send_default = False
+        print("send_default:",send_default)
 
 
         # cv.imshow('from client1', img)
@@ -43,8 +50,13 @@ def receive_photo():
 
 @app.route('/view_browser', methods=['GET'])
 def show_photo_browser():
+    print("send_default/view_browser:", send_default)
     if request.method == 'GET':
-        return send_file('img.jpg', mimetype='image/jpg')
+        if (send_default == False):
+            return send_file('img.jpg', mimetype='image/jpg')
+        else:
+            print("give default img")
+            return send_file('greeting_img.png', mimetype='image/png')
 
 
 
@@ -82,3 +94,4 @@ if __name__ == '__main__':
             host = host,
             port = port)    
     
+

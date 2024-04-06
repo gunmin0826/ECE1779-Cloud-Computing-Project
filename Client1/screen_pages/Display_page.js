@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View, Alert, Button, TouchableOpacity, SafeAreaView, } from 'react-native';
+import { Dimensions, StyleSheet, Text, View, Alert, Button, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import { Camera, CameraType } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
@@ -6,30 +6,34 @@ import axios from 'axios';
 
 // implmenetation of Camera_page
 const Display_page = ({navigation, route}) => {
-
+  const [reRender, updateRerender] = useState(false)
+  const [imageStatus, updateStatus] = useState(false)
   const [annoedImage, updateImage] = useState("")
   //Start of variables from camera
-  const [type, setType] = useState(CameraType.back);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [streamStatus, changeStreamStatus] = useState(false);
-  const [camReady, changeCamReady] = useState(false);
-  const cameraRef = useRef();
   const BASE_URL = route.params.BASE_URL; 
-  const [initial, setInitial] = useState(true);
   //End of variables from camera
 
+  // Set dynamic image container
+  const original_width = 400
+  const original_height = 500
+  const aspectRatio = original_width/original_height
+  const screenWidth = Dimensions.get('window').width;
+  const calculatedHeigt = screenWidth/aspectRatio;
+
+  var default_Img = require('./default_img.png')
+  
   function getData(){
     // console.log("url: " + url)
     axios({
       method: 'get',
-      url: url + '/view_app',//check URL with Lily or have another way to input URL in the UI
+      url: BASE_URL + '/view_app',//check URL with Lily or have another way to input URL in the UI
       timeout: 5000,
     })
       .then((response) => {
         if(response === 200){//successfully sent image back
           console.log(response.data);
           updateImage(response.data)
-          updateImageBool(true)
+          updateStatus(true)
         } else if (response === 400){
           // no image was in server
         }
@@ -42,14 +46,42 @@ const Display_page = ({navigation, route}) => {
   }//might want to change this to be useEffect instead so it is constantly updated
     // Refer to camera page but don't use async, it should be continuous
 
+  function toggleState(){
+    imageStatus? updateStatus(false) : updateStatus(true)
+  }
+  // console.log(BASE_URL+'/view_browser')
+
+  function toggleRerender() {
+    reRender? toggleRerender(false) : toggleRerender(true)
+  }
+
+
+  useEffect(()=>{
+    let interval = setInterval( async () => {
+
+    })
+  })
+
 
   return (
     <View style={styles.container}>
-      { annoedImage && <Image style={styles.displayImage} source={{uri: annoedImage}}/>}//display image if it exists¬
-      <Button
-        title="Get Picture"
-        onPress={getData}
-      />
+      {imageStatus &&
+      <> 
+        <Image 
+          style={{width:screenWidth, height:calculatedHeigt}} 
+          source={{
+            uri:BASE_URL+'/view_browser',
+            method: 'GET',
+          }} 
+          resizeMode = 'contain'
+        />
+        <Button style={styles.button} title='Image State: True' onPress={toggleState}/>
+      </>}
+      { (imageStatus===false) &&
+      <>
+        <Image source={default_Img}/> 
+        <Button style={styles.button} title='Image State: False' onPress={toggleState}/>
+      </>}
     </View>
   );
 };
@@ -63,6 +95,7 @@ const styles = StyleSheet.create({
   displayImage: {
     width: 400,
     height: 500,
+    backgroundColor: 'blue',
   },
   camera: {
     flex: 1,

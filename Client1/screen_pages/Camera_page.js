@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet, Text, View, Alert, Button, TouchableOpacity, SafeAreaView, } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
+import { Camera, CameraType, AutoFocus } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
@@ -84,7 +84,8 @@ const Camera_page = ({navigation, route}) => {
   return (
     <View style={styles.container}>
       <View style={styles.cameraSize}>
-        <Camera ref={cameraRef} style={styles.camera} type={type} onCameraReady={onCameraReady}>
+        <Camera ref={cameraRef} style={styles.camera} type={type} onCameraReady={onCameraReady} autoFocus={AutoFocus.on}>
+        {/* <Camera ref={cameraRef} style={styles.camera} type={type} onCameraReady={onCameraReady} > */}
         </Camera>
       </View>
       <View style={styles.buttonContainer}>
