@@ -39,11 +39,11 @@ const Camera_page = ({navigation, route}) => {
     // create async repeated post request to Server. immediately cancel the async call if we are not supposed to
     let interval = setInterval( async () => { // wait for the picture to be taken as call again until 'streamStatus' becomes false
         const photo = await cameraRef.current.takePictureAsync({base64:true});
-    axios.post(BASE_URL + '/stream', {
-        height: photo.height,
-        width: photo.width,
-        base64: photo.base64,
-    })
+        axios.post(BASE_URL + '/stream', {
+            height: photo.height,
+            width: photo.width,
+            base64: photo.base64,
+        })
     // might want to comment out the .then() cluase so we dont need to wait for server's response
     // .then(function (response) {
     //   console.log(response.data);
@@ -100,7 +100,7 @@ const Camera_page = ({navigation, route}) => {
         </TouchableOpacity> 
       </View>}
       { camReady && streamStatus && 
-        <View style={styles.buttonContainer_red}>
+      <View style={styles.buttonContainer_red}>
         <TouchableOpacity style={styles.button} onPress={stopStreaming}>
           <Text style={styles.text}> Stop Streaming </Text>
         </TouchableOpacity>

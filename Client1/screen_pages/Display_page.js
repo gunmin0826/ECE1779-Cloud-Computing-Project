@@ -6,9 +6,10 @@ import axios from 'axios';
 
 // implmenetation of Camera_page
 const Display_page = ({navigation, route}) => {
-  const [reRender, updateRerender] = useState(false)
-  const [imageStatus, updateStatus] = useState(false)
-  const [annoedImage, updateImage] = useState("")
+  // const [reRender, updateRerender] = useState(false)
+  const [stream, updateStream] = useState(false)
+  // const [annoedImage, updateImage] = useState("")
+  const [toggler, setToggler] = useState(false)
   //Start of variables from camera
   const BASE_URL = route.params.BASE_URL; 
   //End of variables from camera
@@ -47,25 +48,71 @@ const Display_page = ({navigation, route}) => {
     // Refer to camera page but don't use async, it should be continuous
 
   function toggleState(){
-    imageStatus? updateStatus(false) : updateStatus(true)
+    stream? updateStream(false) : updateStream(true)
   }
   // console.log(BASE_URL+'/view_browser')
 
-  function toggleRerender() {
-    reRender? toggleRerender(false) : toggleRerender(true)
+  function Toggle(){
+    toggler? setToggler(false) : setToggler(true)
   }
 
 
-  useEffect(()=>{
-    let interval = setInterval( async () => {
+  function renderImageFromServer(){
+    console.log("Render server image")
+    Toggle();
+    // return (
+    //   <View style={styles.container}>
+    //     <Image 
+    //       style={{width:screenWidth, height:calculatedHeigt}} 
+    //       source={{
+    //         uri:BASE_URL+'/view_browser',
+    //         method: 'GET',
+    //       }} 
+    //       resizeMode = 'contain'
+    //     />
+    //     <View sytle={styles.buttonContainer_red}>
+    //       <TouchableOpacity sytle={styles.buttonContainer_red} onPress={toggleState}>
+    //         <Text style={styles.button}> Stop Streaming </Text>
+    //       </TouchableOpacity> 
+    //     </View>
+    //   </View>);
+  }
 
-    })
-  })
+  function renderDefaultImage(){
+    console.log("renderDefaultImage")
+    // Toggle()
+    // return(
+    //   <View style={styles.container}>
+    //     <Image source={default_Img}/> 
+    //     <View sytle={styles.buttonContainer_red}>
+    //       <TouchableOpacity sytle={styles.buttonContainer} onPress={toggleState}>
+    //         <Text style={styles.button}> Start Streaming </Text>
+    //       </TouchableOpacity> 
+    //     </View>
+    //   </View>
+    // );
+  }
+
+  var counter = 0
+  const max_count = 100
+  useEffect(()=>{
+    let interval = setInterval( () => {
+      return renderImageFromServer();
+    }, 0);
+    if (stream===false){
+      clearInterval(interval);
+      return renderDefaultImage();
+    }
+
+    return () => {
+      clearInterval(interval);
+    }
+  }, [stream])
 
 
   return (
     <View style={styles.container}>
-      {imageStatus &&
+      {stream &&
       <> 
         <Image 
           style={{width:screenWidth, height:calculatedHeigt}} 
@@ -77,10 +124,10 @@ const Display_page = ({navigation, route}) => {
         />
         <Button style={styles.button} title='Image State: True' onPress={toggleState}/>
       </>}
-      { (imageStatus===false) &&
+      { (stream===false) &&
       <>
         <Image source={default_Img}/> 
-        <Button style={styles.button} title='Image State: False' onPress={toggleState}/>
+        <Button style={styles.button} title='Start Streaming' onPress={toggleState}/>
       </>}
     </View>
   );
