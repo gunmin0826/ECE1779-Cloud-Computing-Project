@@ -1,56 +1,48 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from app_processing import yoloProcess	#888888
 
+import socket
 import logging
 import numpy as np
 import cv2
 import os
+from ultralytics import YOLO
 import json	######
-import base64	
+import base64
+from io import BytesIO
+from PIL import Image
 
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 #os.makedirs("temp", exist_ok=True)
-
-#host = ('172.20.10.10', 8888)
-host = ('localhost', 8888)
+#hostip = os.getenv('SERVER_HOST', '0.0.0.0')
+#port = int(os.getenv('SERVER_PORT', '5000'))
+#host = (hostip, port)
+host = ('172.20.10.2', 12345)
 #yoloModel = yoloProcess()	#666666
 
 
 class RequestHandler(BaseHTTPRequestHandler):
-    def __init__(self,a,b,c):
-        print('ZZZZZZZZZZZ1')
-        self.yoloModel = yoloProcess()
-        print('ZZZZZZZZZZZ2')
+    def __init__(self,request,client_address,server):
+        super().__init__(request,client_address,server)
         self.pFrame = False
-        print('ZZZZZZZZZZZ3')
-        super().__init__(a,b,c)
-        print('ZZZZZZZZZZZ4')
+        self.model = YOLO("yolov8n.pt")
 
     def do_GET(self):
-        '''
-        if self.pFrame:
-            #print('222222a')
-            self.wfile.write(self.pFrame)
-        else:
-            #print('222222b')
-            self.wfile.write(b"No image has been processed yet.")
-	'''
         #filename = "."+self.path
         print('Receive GET request')
-        filename = 'stream'					
         try:
-            with open(filename, 'rb') as f:
-                print(filename, ' exists')
+            if os.path.exists("temp.png"):
                 self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                rdata = f.read()
-                #rdata = base64.b64encode(rdata)		#2024.04.05
-                self.wfile.write(rdata)
-                return "Hello World"
+                self.send_header('Content-type', 'image/png')
+                self.send_header('Cache-Control', 'private, no-store, must-revalidate,max-age=0')
+                self.send_header('Pragma', 'no-cache')
+                self.send_header('Expires','0')
+                with open("temp.png","rb") as file:
+                    self.wfile.write(file.read())
+                os.remove("temp.png")
+                print(os.path.exists("temp.png"))
         except FileNotFoundError:
             '''
             self.send_response(404)
@@ -64,37 +56,34 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
-        if hasattr(self, 'yoloModel'):							
-            self.yoloModel = yoloProcess()
-            #print('zzzzzzz')
-        print('Receive POST request')				
+        self.model = YOLO("yolov8n.pt")
+        print('Receive POST request')
         content_type = self.headers['Content-Type']
         content_length = int(self.headers['Content-Length'])
-        print('POST content type=',content_type,'content_length=',content_length)	
-        #print('33333=',self.rfile)
+        print(f'POST content type={content_type} content_length={content_length}')
+        
 
-        contentraw = self.rfile.read(content_length) 		
-        print('555555 content len=',len(contentraw))		
-        content = json.loads(contentraw)				
-        print('666666 content len=',len(contentraw))		
-        if 'width'  in content and 'height'  in content and 'base64'  in content:
+        contentraw = self.rfile.read(content_length)
+        content = json.loads(contentraw)
+        if 'width' in content and 'height' in content and 'base64' in content:
             image_content = content['base64']			
-            print('Image width=',content['width'],'height=',content['height'],' len=',len(image_content))
-            contentb64 = content['base64'].encode('utf-8')
+            #print('Image width=',content['width'],'height=',content['height'],' len=',len(image_content))
+            contentb64 = base64.b64decode(content['base64'])
+            image = Image.open(BytesIO(contentb64))
+            image_np = np.array(image, dtype='uint8')
+            #print(image_np.shape)
             #processedFrame = contentb64					#-999999
-            processedFrame = self.yoloModel.processInput(contentb64)	#9999999
+            frame = self.model(image_np)
+            processedFrame = frame[-1].plot()	#ßß9999999
             self.send_response(200)
             self.end_headers()
             self.wfile.write(processedFrame)						
             #self.wfile.write(b'success post file\n')					
-            self.pFrame = processedFrame						
-
-            #save image into tempfile of current directory
-            filename = 'stream'						
-            with open(filename, 'w') as f:					
-                #processedFrame = base64.b64decode(processedFrame)		#2024.04.05
-                f.write(processedFrame.decode('utf-8'))		
-                #f.write(image_content )					
+            self.pFrame = processedFrame
+            im = Image.fromarray(self.pFrame)
+            im = im.rotate(270)
+            im.save("temp.png")
+				
 
         elif 'width'  not in content :
             self.send_response(400)
@@ -108,26 +97,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(400)
             self.end_headers()
             self.wfile.write(b'base64 not in POST request!')
-        '''
-            else:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write(b'No image provided in the request!')
-        
-        elif content_type in ('image/jpeg', 'image/png'):
-            # Handling raw image data
-            content = self.rfile.read(content_length)
-            processedFrame = self.yoloModel.processInput(content)
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(processedFrame)
-            self.pFrame = processedFrame
 
-        else:
-            self.send_response(400)
-            self.end_headers()
-            self.wfile.write(b'Unsupported content type!')
-        '''
 
 if __name__ == '__main__':
     server = HTTPServer(host, RequestHandler)
